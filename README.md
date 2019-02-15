@@ -2,6 +2,8 @@ SLAM & Navigation
 ==================
 Material for day 2 of the ROS Workshop
 
+TODO: add Youtube video
+
 Introduction
 -------------
 
@@ -17,6 +19,27 @@ For a mobile robot to navigate through its environment, it requires both 1) a ma
 Instructions
 ----------------
 
+### Bootstrap Catkin Workspace
+
+Create a new Catkin workspace ```workshop_ws``` and Git clone this repository into the folder ```workshop_ws/src```.
+
+<details><summary>Click here to cheat!</summary>
+
+```
+# Install wstool and rosdep.
+sudo apt-get update
+sudo apt-get install -y python-wstool python-rosdep
+
+# Create a new workspace in 'workshop_ws'
+mkdir workshop_ws && cd workshop_ws
+wstool init src
+
+# Git clone repo
+git -C ./src clone -b master https://github.com/ros-workshop/slam-navigation.git
+```
+</details>
+
+
 ### GMapping for SLAM
 
 http://wiki.ros.org/gmapping
@@ -25,9 +48,6 @@ http://wiki.ros.org/gmapping
 
 ### Move_base for Navigation
 
-<details><summary>d</summary>
-test
-</details>
 
 ### Stretch Goals
 * **Geofencing your robot:** 
@@ -44,7 +64,6 @@ test
   * **Goal:** test Cartographer, a modern pose-graph based SLAM implementation 
   * **Instructions:**
     * Clone and build Google's Cartographer by following the instructions [here](https://google-cartographer-ros.readthedocs.io/en/latest/)
-    * 
     * Remap
 
 ### Questions
