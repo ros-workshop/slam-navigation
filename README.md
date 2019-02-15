@@ -1,6 +1,6 @@
 SLAM & Navigation
 ==================
-Material for day 2 of the ROS Workshop
+Material for day 2 of the ROS Workshop.  
 
 TODO: add Youtube video
 
@@ -8,7 +8,7 @@ Introduction
 -------------
 
 ### Simultaneous Localisation and Mapping (SLAM)
-For a mobile robot to navigate through its environment, it requires both 1) a map and 2) knowledge of where it is in that map. This is the "Simultaneous Localisation and Mapping" or SLAM problem, which has been a core problem in robotics over the last few decades.
+For a mobile robot to navigate through its environment, it requires both 1) a map and 2) knowledge of where it is in that map. This is the "Simultaneous Localisation and Mapping" or SLAM problem, which is a fundamental problem in robotics and the focus of considerable research over the last few decades.
 * Spend a few minutes reading about the SLAM problem on Wikipedia [here](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping).  
 * The SLAM algorithm used in this workshop is a Rao-Blackwellized Particle Filter ([this tutorial](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/rbpf-slam-tutorial-2007.pdf) has some more information on RBPFs).  
 * The ROS implementation used here is called [GMapping](http://wiki.ros.org/gmapping), it was open sourced by Grisetti et al [here](https://openslam-org.github.io/gmapping.html), while [this paper](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti07tro.pdf) describes the algorithm in detail. 
@@ -18,6 +18,11 @@ For a mobile robot to navigate through its environment, it requires both 1) a ma
 
 Instructions
 ----------------
+
+### Overview
+This session will build on the ROS packages Clearpath makes available for their [Husky robot base](http://wiki.ros.org/Robots/Husky).  You will install and configure the gmapping SLAM package, along with the Move_base navigation package. 
+
+ros-kinetic-husky-simulator
 
 ### Bootstrap Catkin Workspace
 
@@ -36,6 +41,11 @@ wstool init src
 
 # Git clone repo
 git -C ./src clone -b master https://github.com/ros-workshop/slam-navigation.git
+
+#install rosdeps
+
+ros-kinetic-husky-simulator
+
 ```
 </details>
 
@@ -50,6 +60,12 @@ http://wiki.ros.org/gmapping
 
 
 ### Stretch Goals
+* **Try on a real robot:** 
+  * **Motivation:** simulated robots often miss some of the subtleties of real robots   
+  * **Goal:** configure a [TurtleBot3](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
+  * **Instructions:**
+    * There are limited TurtleBot3s available, please demonstrate navigation in Gazebo first
+    * Follow the [instructions here](http://emanual.robotis.com/docs/en/platform/turtlebot3/navigation)
 * **Geofencing your robot:** 
   * **Motivation:** we want to annotate the map to keep the robot in a particular area 
   * **Goal:** save the map to disk, edit it, and then relocalising and navigate in it
