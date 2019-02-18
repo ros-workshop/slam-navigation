@@ -13,8 +13,11 @@ For a mobile robot to navigate an environment, it requires both 1) a map of its 
 * Spend a few minutes reading about the SLAM problem on Wikipedia [here](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping).  
 * The SLAM algorithm used in this workshop is a Rao-Blackwellized Particle Filter ([this tutorial](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/rbpf-slam-tutorial-2007.pdf) has some more information on RBPFs).  
 * The ROS implementation used here is called [GMapping](http://wiki.ros.org/gmapping), it was open sourced by Grisetti et al. [here](https://openslam-org.github.io/gmapping.html), while [this paper](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti07tro.pdf) describes the algorithm in detail.
+* [This comprehensive slide deck](https://www.rsj.or.jp/databox/international/iros16tutorial_1.pdf) by Wolfram Burgard is a good general overview of SLAM algorithms.  
 
 ### Navigation
+* https://en.wikipedia.org/wiki/Robot_navigation
+* http://wiki.ros.org/navigation/Tutorials
 * TODO
 
 ## Workspace Setup
@@ -182,12 +185,14 @@ Tell the simulated Husky to navigate to a waypoint:
 * This "hunting" behaviour is common, and relates to the goal tolerance in the local planner.
 * Find the parameter file that configures the local planner and adjust it appropriately. 
 
-<details><summary>Click for a hint</summary>
+<details>
+    <summary>Click for a hint</summary>
     
    * In the `move_base.launch` file, look for the line `<arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>`
     * This maps to the local planner being used and hints at the config file section
 
-<details><summary>Click to cheat</summary>
+<details>
+    <summary>Click to cheat</summary>
 
     * The particular lines to consider are in `config/planner.yaml` file [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/config/planner.yaml#L72)
 
@@ -198,22 +203,17 @@ Tell the simulated Husky to navigate to a waypoint:
 * There is another trade off here between how close you want your robot to achieve its target, vs. how many three-point turns it performs trying to navigate accurately!
 
 
-## Stretch Goals
-* velodyne TODO
-* increase lidar range
-* Later, try loading a different Gazebo world with, e.g.: 
+## Extra Goals
+* **Try increase the maximum lidar range in `gmapping`**
+  * The default in `husky_gmapping.launch` is six meters
+  * What happens when the lidar can hit all four walls at the same time? 
+  * Does the CPU usage increase? Can the particle count be decreased?  
+* **Try a different Gazebo world:**  
      ```
      roslaunch husky_gazebo husky_empty_world.launch \
              world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
      ```
   * Note: the `jackal_race.world` file is found in `sudo apt install ros-kinetic-jackal-gazebo`
-
-* **Try on a real robot:** 
-  * **Motivation:** simulated robots often miss some of the subtleties of real robots   
-  * **Goal:** configure a [TurtleBot3](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
-  * **Instructions:**
-    * There are limited TurtleBot3s available, please demonstrate navigation in Gazebo first
-    * Follow the [instructions here](http://emanual.robotis.com/docs/en/platform/turtlebot3/navigation)
 * **Geofencing your robot:** 
   * **Motivation:** we want to annotate the map to keep the robot in a particular area 
   * **Goal:** save the map to disk, edit it, and then relocalising and navigate in it
@@ -223,6 +223,17 @@ Tell the simulated Husky to navigate to a waypoint:
     * Edit the gridmap (e.g. GIMP) to add some virtual "fences" 
     * Load the map and use the `amcl` package to relocalise the robot (hint: start [here](http://wiki.ros.org/husky_navigation/Tutorials/Husky%20AMCL%20Demo))
     * Show that `move_base` can navigate without crossing your virtual fences 
+
+
+## Stretch Goals
+* **Add a Velodyne VLP-16 lidar:** 
+  * **Motivation:** A 16-plane lidar scanner provides a comprehensive 3D view of the world, however the extra data doesn't work out of the box with `gmapping` and `move_base`.  
+  * **Goal:** integrate a VLP-16 into Gazebo and configure it to work with `gmapping` and `move_base`.
+  * **Hints:**
+    * Integrate into Gazebo (including the URDF)
+    * The VLP-16's point cloud will need to be squashed into a laser scan topic for `gmapping`
+    * What is the best way to filter lidar returns from the ground? 
+    * The same technique can be used for `move_base`, however you could explore [this package.](https://github.com/SteveMacenski/spatio_temporal_voxel_layer).
 * **Large-scale SLAM:** 
   * **Motivation:** The RBPF algorithm used in ```gmapping``` does not scale well
   * **Goal:** test Cartographer, a modern pose-graph based SLAM implementation 
@@ -230,7 +241,13 @@ Tell the simulated Husky to navigate to a waypoint:
     * Clone and build Google's Cartographer by following the instructions [here](https://google-cartographer-ros.readthedocs.io/en/latest/)
     * **Warning:** Make sure you don't install Protobuf 3.x system wide (don't type sudo!) or you'll break other ROS packages. 
     * If you get stuck, Clearpath have done [some of the work for you.](https://github.com/husky/husky_cartographer_navigation/blob/master/husky_cartographer_install.sh)
-    * Note: make sure you understand what `catkin_make_isolated` does (e.g. you'll need to run catkin_make more, )
+    * Note: make sure you understand what `catkin_make_isolated` does if you're actively developing in a workspace (you've been warned!)
+* **Try on a real robot:** 
+  * **Motivation:** simulated robots often miss some of the subtleties of real robots   
+  * **Goal:** configure a [TurtleBot3](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
+  * **Instructions:**
+    * There are limited TurtleBot3s available, please demonstrate navigation in Gazebo first
+    * Follow the [instructions here](http://emanual.robotis.com/docs/en/platform/turtlebot3/navigation)
 
 ### Questions
 * What does the tf tree and node graphs look like while navigating?
