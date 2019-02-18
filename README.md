@@ -32,7 +32,7 @@ This session will build on the ROS packages Clearpath makes available for their 
 
 * Make sure you are using the Catkin Workspace you created yesterday ([instructions here](https://github.com/ros-workshop/course)) and you have Git cloned this repository into the folder `workshop_ws/src`.
 
-<details><summary>Hint</summary>
+<details><summary>Click for a hint</summary>
 
 Either: 
 ```
@@ -49,7 +49,7 @@ git clone git@github.com:ros-workshop/slam-navigation.git
 
 * You should have installed the Husky Debian packages `ros-kinetic-husky-simulator` and `ros-kinetic-husky-viz` yesterday using `apt`. Install the `ros-kinetic-husky-navigation` package also.
 
-<details><summary>Hint</summary>
+<details><summary>Click for a hint</summary>
 
 ```
 sudo apt install ros-kinetic-husky-simulator ros-kinetic-husky-viz ros-kinetic-husky-navigation
@@ -57,35 +57,64 @@ sudo apt install ros-kinetic-husky-simulator ros-kinetic-husky-viz ros-kinetic-h
 
 </details>
 
-The `ros-kinetic-husky-navigation` Debian package is dependent on the `gmapping` and `move_base` ROS packages, and will install them automatically. 
+* The `ros-kinetic-husky-navigation` Debian package is dependent on the `gmapping` and `move_base` ROS packages that are used in this workshop-- they will be installed automatically. 
+
 
 ## Launching Gazebo with `gmapping` and `move_base`
 
-To jump start to a working configuration, this repository includes a customised version of the `husky_navigation` package. 
+To jump start to a working configuration, this repository includes a customised version of Clearpath's `husky_navigation` package. 
 
-Launch `gazebo`, `gmapping` and `move_base` in three separate terminal windows:
-1. Launch the Clearpath-configured Husky simulation environment:
+Launch `gazebo`, `rviz`, `gmapping` and `move_base` in four separate terminal windows:
+1. Launch the Husky simulation environment:
     ```
     roslaunch husky_gazebo husky_playpen.launch
     ```
-    * Note: This will take several minutes to start on first run, as the simulator needs to download resources from the Gazebo servers.
-    * Check the console for error messages before proceeding.  
-1. Launch the Rviz visualizer:
+    * Note: 
+      * This will take several minutes to start on first run, as the simulator needs to download resources from the Gazebo servers
+      * This will start the roscore server
+      * Consider arranging this window so it fills the left half of the screen
+      * Check the console for error messages before proceeding
+1. Launch `rviz` for visualisation:
     ```
     roslaunch slam_navigation husky_rviz.launch
     ```
-1. Launch `gmapping` and `move_base`:
+    * Note: 
+        * Consider arranging this window so it fills the right half of the screen
+1. Launch `gmapping`:
     ```
-    roslaunch slam_navigation husky_slam_navigation.launch
+    roslaunch slam_navigation husky_gmapping.launch
     ```
+    * Note: 
+      * The `gmapping` occupancy gridmap output is shown in `rviz`:
+          * Black cells are obstacles
+          * TODO cells are free space
+          * Grey cells are unknown
+1. Launch `move_base`:
+    ```
+    roslaunch slam_navigation husky_move_base.launch
+    ```
+    * Note: 
+        * In `rviz`, make sure the visualizers in the Navigation group are enabled.
+        * Use the 2D Nav Goal tool in the top toolbar to set a movement goal in the visualizer. 
+          * Make sure to select an unoccupied (TODO) or unexplored (TODO grey) location.
+
+## Basic 
+
+
+
+As the robot moves, you should see the grey static map (map topic) grow. Occasionally, the gmapping algorithm will relocalize the robot, causing a discrete jump in the map->odom transform.
+
+
+
 
 ### Hints:
-* If you're running in a virtual machine, slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel)
+* If you're running in a virtual machine, slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel). Similarly, increase this to ~30 Hz on a fast PC. 
 * Try loading a different Gazebo world with, e.g.: 
      ```
-     roslaunch husky_gazebo husky_empty_world.launch world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
+     roslaunch husky_gazebo husky_empty_world.launch \
+             world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
      ```
-  * Note: this `jackal_race.world` file is found in `sudo apt install ros-kinetic-jackal-gazebo`
+  * Note: the `jackal_race.world` file is found in `sudo apt install ros-kinetic-jackal-gazebo`
 * If Gazebo freezes, you may need to force kill it with `pkill gzserver`
 
 ## Exploring SLAM using `gmapping` 
@@ -119,9 +148,9 @@ velodyne
   * **Goal:** save the map to disk, edit it, and then relocalising and navigate in it
   * **Instructions:**
     * Build a complete map of the environment using `gmapping`
-    * Save the gridmap to disk (hint: google `ros map_server map_saver` and shut down `gmapping`
+    * Save the gridmap to disk (hint: google `ros map_server map_saver`) and shut down `gmapping`
     * Edit the gridmap (e.g. GIMP) to add some virtual "fences" 
-    * Load the map and use the `amcl` package to relocalise the robot
+    * Load the map and use the `amcl` package to relocalise the robot (hint: start [here](http://wiki.ros.org/husky_navigation/Tutorials/Husky%20AMCL%20Demo))
     * Show that `move_base` can navigate without crossing your virtual fences 
 * **Large-scale SLAM:** 
   * **Motivation:** The RBPF algorithm used in ```gmapping``` does not scale well
