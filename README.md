@@ -118,33 +118,62 @@ All real-world sensor data is noisy, thus, when a robot drives around fusing its
 
 `gmapping` uses a Rao-Blackwellized Particle Filter to represent the current hypotheses of the robot's trajectory. Here, dozens of particles (or more) work together to describe complex probability distributions that are non-Gaussian and can handle nonlinear process and measurement models. However, for a fixed size set of particles, there is a maximum number of hypotheses that can be represented. Use Google to spend a few minutes learning about "[sample starvation](http://lmgtfy.com/?q=sample+starvation+particle+filter+slam)".
 
-### Task 1: Does the current `gmapping` configuration look like it is handling drift? 
+**Note:** if at any time the gridmap gets badly distorted, restart  `gmapping` by hitting CTRL+C in its terminal window. `move_base` will not be able to create global plans if the gridmap is distorted. 
+
+### Task 1: Drift, or accumulated sensor errors 
+Does the current `gmapping` configuration look like it is handling drift? 
 * After driving around the simulated environment, errors appear to accumulate without bound.
 * Check if the `gmapping` configuration could be experiencing sample starvation.
 * Change one of the parameters and restart `gmapping` to see if the drift is corrected and map errors reduced.
 
+<details><summary>Click for a hint</summary>
+   Look at the parameters in the `husky_gmapping.launch` file
 <details><summary>Click to cheat</summary>
-  The particular line to consider in the husky_gmapping.launch file is [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/launch/husky_gmapping.launch#L40)
+  The particular line to consider in the `husky_gmapping.launch` file is [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/launch/husky_gmapping.launch#L40)
+</details>
 </details>
 
-### Task 2: Check the CPU used by `gmapping` before and after the change 
+### Task 2: CPU usage
+What is `gmapping's` CPU usage before and after the change? 
 * Hint: use `htop` and make sure Gazebo is a 1.0x realtime for both. 
 * With particle filters, there's a direct (linear) trade between the number of particles and CPU usage. This will directly affect the size of the environment that `gmapping` can handle. `gmapping` struggles to perform loop closures and maintain map accuracy when exploring dozens of meters 'open loop' (not revising previously seen parts of the map). 
 
-### Task 3: Start with a clean gridmap and navigate the Husky around the outside of the environment again. 
+### Task 3: Loop closures and transforms
+* With a clean gridmap, navigate the simulated Husky around the outside of the environment again.
 * Try to observe what happens when a previously visited part of the map is revisited after a long excursion. 
-* If you notice a jump in the robot's pose, this is a classical "loop closure". The `gmapping` algorithm will ocassionally perform small loop closures.
+* If you notice a jump in the robot's pose, this is a classical "loop closure". The `gmapping` algorithm will ocassionally perform small loop closures like this.
 * Change the Fixed Frame in `Global Options` in the Displays panel to "odom" instead of "map"
    * Perform another loop closure and observe what happens. 
    * ROS specifies that the odom->base_link transform is continuous. Take a look at [REP 105](http://www.ros.org/reps/rep-0105.html) for more information.  
    * Loop closures create a discrete jump in the map->odom transform.
+   * Tune the particle count to balance CPU usage vs. ability to perform loop closures.
  
+## Exploring Navigation with `move_base` 
 
-### Exploring Navigation with `move_base` 
+While there are dozens of navigation algorithms described in the literature (`move_base` only implements a few), there exists a handful of commonly occuring parameters. We'll explore two of them here. 
 
-*Note:* if at any time the gridmap gets badly distorted, restart  `gmapping` by hitting CTRL+C in its terminal window. `move_base` will not be able to create global plans if the gridmap is distorted. 
+### Task 1: Goal tolerances 
+Give the Husky a waypoint to navigate to  
+* You might notice that the simulated Husky doesn't stop completely after reaching its goal. This "hunting" behaviour is common, and relates to the goal tolerance in the local planner.
+* Find the parameter file that configures the local planner and adjust it appropriately. 
 
-hunting for goal
+<details><summary>Click for a hint</summary>
+   In the `move_base.launch` file, look for the line
+    ```xml
+      <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>
+    ```
+    This maps to the local planner being used and hints at the config file section
+<details><summary>Click to cheat</summary>
+  The particular lines to consider are in the `config/planner.yaml` file is [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/config/planner.yaml#L72)
+</details>
+</details>
+
+* There is another trade off here between how close you want your robot to achieve its target, vs. how many three-point turns it performs trying to navigate accurately. 
+
+### Task 2: Obstacle avoidance
+* Try instructing the Husky to drive close around an obstacle:
+  * You might notice it approaching too close (or crashing and/or flipping!); we'll look at this later also
+
 
 too close to obstacles
 
