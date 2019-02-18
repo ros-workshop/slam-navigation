@@ -1,19 +1,18 @@
 # SLAM & Navigation
-Material for day 2 of the ROS Workshop.  
 
-**Overview:** This session will build on the ROS packages Clearpath makes available for their [Husky robot base](http://wiki.ros.org/Robots/Husky).  You will explore the `gmapping` SLAM package, along with the `move_base` navigation package.
+**Goal:** At the end of this session you should have a simulated robot navigating smoothly to user-selected waypoints, like this randomly selected Youtube video:
 
-**Goal:** At the end of this session you should have a simulated robot navigating to user-selected waypoints, like this randomly selected Youtube video:
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=WmGVRX2r8WY" target="_blank"><img src="http://img.youtube.com/vi/WmGVRX2r8WY/0.jpg" alt="Video" width="480" height="360" border="10" /></a>
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=WmGVRX2r8WY" target="_blank"><img src="http://img.youtube.com/vi/WmGVRX2r8WY/0.jpg" alt="Video" width="240" height="180" border="10" /></a>
+**Overview:** This session uses the ROS packages Clearpath makes available for their [Husky robot base](http://wiki.ros.org/Robots/Husky).  You will experiment with the `gmapping` SLAM package, along with the `move_base` navigation package.
 
-## Introduction
+## Background
 
 ### Simultaneous Localisation and Mapping (SLAM)
-For a mobile robot to navigate through its environment, it requires both 1) a map of its environment, and 2) knowledge of where it is in that map. This is the "Simultaneous Localisation and Mapping" or SLAM problem, which is a fundamental problem in robotics and the focus of considerable research over the last few decades.
+For a mobile robot to navigate an environment, it requires both 1) a map of its environment, and 2) knowledge of where it is in that map. This is the "Simultaneous Localisation and Mapping" or SLAM problem, which is a fundamental problem in robotics and the focus of considerable research over the last few decades.
 * Spend a few minutes reading about the SLAM problem on Wikipedia [here](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping).  
 * The SLAM algorithm used in this workshop is a Rao-Blackwellized Particle Filter ([this tutorial](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/rbpf-slam-tutorial-2007.pdf) has some more information on RBPFs).  
-* The ROS implementation used here is called [GMapping](http://wiki.ros.org/gmapping), it was open sourced by Grisetti et al [here](https://openslam-org.github.io/gmapping.html), while [this paper](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti07tro.pdf) describes the algorithm in detail.
+* The ROS implementation used here is called [GMapping](http://wiki.ros.org/gmapping), it was open sourced by Grisetti et al. [here](https://openslam-org.github.io/gmapping.html), while [this paper](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti07tro.pdf) describes the algorithm in detail.
 
 ### Navigation
 * TODO
@@ -22,7 +21,8 @@ For a mobile robot to navigate through its environment, it requires both 1) a ma
 
 * Make sure you are using the Catkin Workspace you created yesterday ([instructions here](https://github.com/ros-workshop/course)) and you have Git cloned this repository into the folder `workshop_ws/src`.
 
-<details><summary>Click for a hint</summary>
+<details>
+<summary>Click for a hint</summary>
 
 Either: 
 ```
@@ -37,7 +37,8 @@ git clone git@github.com:ros-workshop/slam-navigation.git
 
 </details>
 
-* You should have installed the Husky Debian packages `ros-kinetic-husky-simulator` and `ros-kinetic-husky-viz` yesterday using `apt`. Install the `ros-kinetic-husky-navigation` package also.
+
+* You should have installed the Husky Debian packages `ros-kinetic-husky-simulator` and `ros-kinetic-husky-viz` yesterday using `apt`. For this session, install the `ros-kinetic-husky-navigation` package also.
 
 <details><summary>Click for a hint</summary>
 
@@ -47,14 +48,16 @@ sudo apt install ros-kinetic-husky-simulator ros-kinetic-husky-viz ros-kinetic-h
 
 </details>
 
-* The `ros-kinetic-husky-navigation` Debian package is dependent on the `gmapping` and `move_base` ROS packages that are used in this workshop-- they will be installed automatically. 
+
+* The `ros-kinetic-husky-navigation` Debian package is dependent on the `gmapping` and `move_base` ROS packages that are used in this workshop, they will be installed automatically. 
 
 
-## Launching the SLAM and Navigation Stack in Gazebo 
+## Launching the SLAM and Navigation Stacks 
 
-To jump start to a working configuration, this repository includes a customised version of Clearpath's `husky_navigation` package. 
+To jump start a working configuration, this repository includes a customised version of Clearpath's `husky_navigation` package. 
 
-First start four separate terminal windows and source the workspace: 
+First start four separate terminal windows (hint: consider using a split screen terminal such as `apt install terminator`), and source your Catkin workspace
+
 <details><summary>Click for a hint</summary>
 
 ```
@@ -62,28 +65,25 @@ cd ~/workshop_ws && source devel/setup.bash
 ```
 </details>
 
-Consider using a split screen terminal such as `apt install terminator`
-
-Launch `gazebo`, `rviz`, `gmapping` and `move_base` in these terminal windows:
+Now, launch `gazebo`, `gmapping` `rviz` and `move_base` in the four terminal windows:
 1. Launch the Husky simulation environment:
     ```
     roslaunch husky_gazebo husky_playpen.launch
     ```
     * Note: 
-      * This will take several minutes to start on first run, as the simulator needs to download resources from the Gazebo servers
-      * This will start the roscore server
-      * Consider arranging this window so it fills the left half of the screen
+      * This will take several minutes to start on first run, as the simulator needs to download resources from the internet
+      * This command will start the roscore server
+      * Consider arranging this window so Gazebo fills the left half of the screen
       * Check the console for error messages before proceeding
 1. Launch `gmapping`:
     ```
     roslaunch slam_navigation husky_gmapping.launch
     ```
-    * Note: 
-      * The `gmapping` occupancy gridmap output is shown in `rviz`:
-          * Black cells are obstacles
-          * Light grey cells are free space
-          * Dark grey cells are unknown
-          * Grey cells are unknown
+    * Note: The `gmapping` occupancy gridmap output is shown in `rviz`:
+      * Black cells are obstacles
+      * Light grey cells are free space
+      * Dark grey cells are unknown
+      * Grey cells are unknown
 1. Launch `rviz` for visualisation:
     ```
     roslaunch slam_navigation husky_rviz.launch
@@ -95,8 +95,7 @@ Launch `gazebo`, `rviz`, `gmapping` and `move_base` in these terminal windows:
     ```
     roslaunch slam_navigation husky_move_base.launch
     ```
-    * Note: 
-        * In `rviz`, make sure Navigation group of visualisers in are enabled in the Displays panel.
+    * Note: In `rviz`, make sure Navigation group of visualisers in are enabled in the Displays panel.
 
 ### Basic Navigation: 
 
