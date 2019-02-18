@@ -3,9 +3,8 @@ Material for day 2 of the ROS Workshop.
 
 **Overview:** This session will build on the ROS packages Clearpath makes available for their [Husky robot base](http://wiki.ros.org/Robots/Husky).  You will explore the `gmapping` SLAM package, along with the `move_base` navigation package.
 
-**Goal:** At the end of this session you should have a simulated robot navigating to user-selected waypoints. 
+**Goal:** At the end of this session you should have a simulated robot navigating to user-selected waypoints, like this randomly selected Youtube video:
 
-Random Youtube video:
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=WmGVRX2r8WY" target="_blank"><img src="http://img.youtube.com/vi/WmGVRX2r8WY/0.jpg" alt="Video" width="240" height="180" border="10" /></a>
 
 ## Introduction
@@ -55,7 +54,17 @@ sudo apt install ros-kinetic-husky-simulator ros-kinetic-husky-viz ros-kinetic-h
 
 To jump start to a working configuration, this repository includes a customised version of Clearpath's `husky_navigation` package. 
 
-Launch `gazebo`, `rviz`, `gmapping` and `move_base` in four separate terminal windows:
+First start four separate terminal windows and source the workspace: 
+<details><summary>Click for a hint</summary>
+
+```
+cd ~/workshop_ws && source devel/setup.bash
+```
+</details>
+
+Consider using a split screen terminal such as `apt install terminator`
+
+Launch `gazebo`, `rviz`, `gmapping` and `move_base` in these terminal windows:
 1. Launch the Husky simulation environment:
     ```
     roslaunch husky_gazebo husky_playpen.launch
@@ -65,12 +74,6 @@ Launch `gazebo`, `rviz`, `gmapping` and `move_base` in four separate terminal wi
       * This will start the roscore server
       * Consider arranging this window so it fills the left half of the screen
       * Check the console for error messages before proceeding
-1. Launch `rviz` for visualisation:
-    ```
-    roslaunch slam_navigation husky_rviz.launch
-    ```
-    * Note: 
-        * Consider arranging this window so it fills the right half of the screen
 1. Launch `gmapping`:
     ```
     roslaunch slam_navigation husky_gmapping.launch
@@ -78,52 +81,77 @@ Launch `gazebo`, `rviz`, `gmapping` and `move_base` in four separate terminal wi
     * Note: 
       * The `gmapping` occupancy gridmap output is shown in `rviz`:
           * Black cells are obstacles
-          * TODO cells are free space
+          * Light grey cells are free space
+          * Dark grey cells are unknown
           * Grey cells are unknown
+1. Launch `rviz` for visualisation:
+    ```
+    roslaunch slam_navigation husky_rviz.launch
+    ```
+    * Note: 
+        * Consider arranging this window so it fills the right half of the screen
+        * Make sure Sensing group of visualisers in are enabled in the Displays panel.
 1. Launch `move_base`:
     ```
     roslaunch slam_navigation husky_move_base.launch
     ```
     * Note: 
-        * In `rviz`, make sure the visualizers in the Navigation group are enabled.
+        * In `rviz`, make sure Navigation group of visualisers in are enabled in the Displays panel.
 
 ### Basic Navigation: 
 
 In the `rviz` window, use the `2D Nav Goal` tool in the top toolbar to set a movement goal in the visualizer. Click and drag to set the desired heading.  As the robot navigates to the goal, you should see the occupancy gridmap grow. 
 
+Try navigating a few big loops around the simulated environment: 
+  * The system will perform badly and you should see errors in the gridmap that continue to grow; we'll look into this in the next section.
+Try instructing the Husky to drive close around the concrete barrier in the center:
+  * You might notice it approaching too close (or crashing/flipping!); we'll look at this later also
+
 ### Hints:
 * If you're running in a virtual machine, slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel). Similarly, increase this to ~30 Hz on a fast PC. 
-* Try loading a different Gazebo world with, e.g.: 
+* If Gazebo freezes, you may need to force kill it with `pkill gzserver`
+* During development, you can stop and restart `gmapping` and `move_base` separately with CTRL+C 
+* In the demo, the lidar's range is deliberately foreshortened
+* If `rviz` appears cluttered, feel free to turn off the Sensing group of visualisers in the Displays panel. 
+* Later, try loading a different Gazebo world with, e.g.: 
      ```
      roslaunch husky_gazebo husky_empty_world.launch \
              world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
      ```
   * Note: the `jackal_race.world` file is found in `sudo apt install ros-kinetic-jackal-gazebo`
-* If Gazebo freezes, you may need to force kill it with `pkill gzserver`
 
 ## Exploring SLAM using `gmapping` 
+
+`gmapping` uses a RBPF (or simply, a particle filter) to represent the current hypotheses of the robot's trajectory. For a fixed size set of particles, there is a maximum number of hypotheses that can be represented. Google 
+
+particle starvation
+particle starvation rbpf
+
+check the CPU usage by `gmapping` before and after this change
+
+With particle filters, there's a direct (linear) trade between the number of particles and CPU usage. This will directly affect the size of the environment that `gmapping` can handle, and it will struggle to perform loop closures and maintain map accuracy when exploring for dozens of meters 'open loop' (not revising previously seen parts of the map). 
 
 Occasionally, the `gmapping` algorithm will perform small loop closures 
 
 correct for relocalize the robot, causing a discrete jump in the map->odom transform.
 
 
-
-
-
-
-
-
-velodyne
-
-
-
  
 
-### Exploring `move_base` for Navigation
+### Exploring Navigation with `move_base` 
+
+*Note:* if at any time the gridmap gets badly distorted, restart  `gmapping` by hitting CTRL+C in its terminal window. `move_base` will not be able to create global plans if the gridmap is distorted. 
+
+hunting for goal
+
+too close to obstacles
+
+http://wiki.ros.org/costmap_2d
+
 
 
 ### Stretch Goals
+* velodyne TODO
 * **Try on a real robot:** 
   * **Motivation:** simulated robots often miss some of the subtleties of real robots   
   * **Goal:** configure a [TurtleBot3](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
