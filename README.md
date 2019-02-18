@@ -114,11 +114,9 @@ In the `rviz` window, use the `2D Nav Goal` tool in the top toolbar to set a mov
 
 ## Exploring SLAM using `gmapping` 
 
-All real-world sensor data is noisy, thus, when a robot drives around fusing its noisy sensor data into a map and pose estimate (the SLAM problem), the map and pose will be noisy and accumulate drift. Unfortunately, the types of errors experienced by wheel odometry and lidar scan matching are frequently *non-Gaussian*, while process and measurement models are typically nonlinear, which means multivariate Gaussian probablility distributions (e.g. the often used Extended Kalman Filter, or EKF) are badly suited to representing a robots pose and map uncertainty.
+All real-world sensor data is noisy, thus, when a robot drives around fusing its noisy sensor data into a map and pose estimate (the SLAM problem), the map and pose will be noisy and accumulate drift. Unfortunately, the types of errors experienced by wheel odometry and lidar scan matching are frequently *non-Gaussian*, while process and measurement models are typically nonlinear, which means multivariate Gaussian probablility distributions (e.g. the frequently used Extended Kalman Filter, or EKF) are badly suited to representing a robots pose and map uncertainty.
 
 `gmapping` uses a Rao-Blackwellized Particle Filter to represent the current hypotheses of the robot's trajectory. Here, dozens of particles (or more) work together to describe complex probability distributions that are non-Gaussian and can handle nonlinear process and measurement models. However, for a fixed size set of particles, there is a maximum number of hypotheses that can be represented. Use Google to spend a few minutes learning about "[sample starvation](http://lmgtfy.com/?q=sample+starvation+particle+filter+slam)".
-
-**Note:** if at any time the gridmap gets badly distorted, restart  `gmapping` by hitting CTRL+C in its terminal window. `move_base` will not be able to create global plans if the gridmap is distorted. 
 
 ### Task 1: Drift, or accumulated sensor errors 
 Does the current `gmapping` configuration look like it is handling drift? 
@@ -133,9 +131,9 @@ Does the current `gmapping` configuration look like it is handling drift?
 </details>
 </details>
 
-### Task 2: CPU usage
+### Task 2: Computational requirements
 What is `gmapping's` CPU usage before and after the change? 
-* Hint: use `htop` and make sure Gazebo is a 1.0x realtime for both. 
+* Hint: use `htop` and make sure Gazebo is running at 1.0x realtime in both instances. 
 * With particle filters, there's a direct (linear) trade between the number of particles and CPU usage. This will directly affect the size of the environment that `gmapping` can handle. `gmapping` struggles to perform loop closures and maintain map accuracy when exploring dozens of meters 'open loop' (not revising previously seen parts of the map). 
 
 ### Task 3: Loop closures and transforms
@@ -152,20 +150,27 @@ What is `gmapping's` CPU usage before and after the change?
 
 While there are dozens of navigation algorithms described in the literature (`move_base` only implements a few), there exists a handful of commonly occuring parameters. We'll explore two of them here. 
 
+**Note:** if at any time the gridmap gets badly distorted, restart  `gmapping` by hitting CTRL+C in its terminal window. `move_base` will not be able to create global plans if the gridmap is distorted. 
+
 ### Task 1: Goal tolerances 
-Give the Husky a waypoint to navigate to  
-* You might notice that the simulated Husky doesn't stop completely after reaching its goal. This "hunting" behaviour is common, and relates to the goal tolerance in the local planner.
+Tell the simulated Husky to navigate to a waypoint:  
+* You might notice that the simulated Husky doesn't stop completely after reaching its goal. 
+* This "hunting" behaviour is common, and relates to the goal tolerance in the local planner.
 * Find the parameter file that configures the local planner and adjust it appropriately. 
 
 <details><summary>Click for a hint</summary>
-   In the `move_base.launch` file, look for the line
-    ```xml
+    
+   * In the `move_base.launch` file, look for the line
+    ```
       <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>
     ```
-    This maps to the local planner being used and hints at the config file section
+    * This maps to the local planner being used and hints at the config file section
 <details><summary>Click to cheat</summary>
-  The particular lines to consider are in the `config/planner.yaml` file is [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/config/planner.yaml#L72)
+
+    * The particular lines to consider are in the `config/planner.yaml` file is [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/config/planner.yaml#L72)
+
 </details>
+
 </details>
 
 * There is another trade off here between how close you want your robot to achieve its target, vs. how many three-point turns it performs trying to navigate accurately. 
