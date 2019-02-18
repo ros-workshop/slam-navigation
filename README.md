@@ -118,7 +118,7 @@ All real-world sensor data is noisy, thus, when a robot drives around fusing its
 
 `gmapping` uses a Rao-Blackwellized Particle Filter to represent the current hypotheses of the robot's trajectory. Here, dozens of particles (or more) work together to describe complex probability distributions that are non-Gaussian and can handle nonlinear process and measurement models. However, for a fixed size set of particles, there is a maximum number of hypotheses that can be represented. Use Google to spend a few minutes learning about "[sample starvation](http://lmgtfy.com/?q=sample+starvation+particle+filter+slam)".
 
-*Task 1:* Does the current `gmapping` configuration look like it is handling drift adequately? 
+### Task 1: Does the current `gmapping` configuration look like it is handling drift? 
 * After driving around the simulated environment, errors appear to accumulate without bound.
 * Check if the `gmapping` configuration could be experiencing sample starvation.
 * Change one of the parameters and restart `gmapping` to see if the drift is corrected and map errors reduced.
@@ -127,10 +127,11 @@ All real-world sensor data is noisy, thus, when a robot drives around fusing its
   The particular line to consider in the husky_gmapping.launch file is [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/launch/husky_gmapping.launch#L40)
 </details>
 
-*Task 2:* Check the CPU used by `gmapping` before and after the change (hint: use `htop` and make sure Gazebo is a 1.0x realtime for both). 
+### Task 2: Check the CPU used by `gmapping` before and after the change 
+* Hint: use `htop` and make sure Gazebo is a 1.0x realtime for both. 
 * With particle filters, there's a direct (linear) trade between the number of particles and CPU usage. This will directly affect the size of the environment that `gmapping` can handle. `gmapping` struggles to perform loop closures and maintain map accuracy when exploring dozens of meters 'open loop' (not revising previously seen parts of the map). 
 
-*Task 3:* Start with a clean gridmap and navigate the simulated Husky around the outside of the environment again. 
+### Task 3: Start with a clean gridmap and navigate the Husky around the outside of the environment again. 
 * Try to observe what happens when a previously visited part of the map is revisited after a long excursion. 
 * If you notice a jump in the robot's pose, this is a classical "loop closure". The `gmapping` algorithm will ocassionally perform small loop closures.
 * Change the Fixed Frame in `Global Options` in the Displays panel to "odom" instead of "map"
