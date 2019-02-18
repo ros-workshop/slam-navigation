@@ -152,7 +152,31 @@ While there are dozens of navigation algorithms described in the literature (`mo
 
 **Note:** if at any time the gridmap gets badly distorted, restart  `gmapping` by hitting CTRL+C in its terminal window. `move_base` will not be able to create global plans if the gridmap is distorted. 
 
-### Task 1: Goal tolerances 
+### Task 1: Obstacle avoidance
+
+Tell the simulated Husky to navigate near to and/or around an obstacle:  
+  * You might notice that it approaches closer than you'd like, and occasionally hits obstacles below its lidar's height
+  * Read about obstacle "inflation" [here](http://wiki.ros.org/costmap_2d). 
+    * Take note of the plot showing how cell cost decreases with the distance from an obstacle.
+    * Note the difference between the "lethal" distance where the robot would be in collision, and the "inscribed" and "possibly circumscribed" distances that depend on the robot's footprint. 
+    * Look for a parameter that might create a "buffer zone" around obstacles to naturally keep the robot further away. 
+    * Find and tune this parameter in the `move_base` configuration files. 
+ 
+<details><summary>Click for a hint</summary>
+    
+   * The parameter affects both local and global cost maps, look in the `move_base.launch` file
+   
+<details><summary>Click to cheat</summary>
+
+    * The particular line to consider is in the `config/costmap_common.yaml` file [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/config/costmap_common.yaml#L24)
+
+</details>
+
+</details>
+
+  * After adjusting this parameter, both the local and global cost maps should show a larger buffer around obstacles in `rviz` 
+
+### Task 2: Goal tolerances 
 Tell the simulated Husky to navigate to a waypoint:  
 * You might notice that the simulated Husky doesn't stop completely after reaching its goal. 
 * This "hunting" behaviour is common, and relates to the goal tolerance in the local planner.
@@ -171,20 +195,10 @@ Tell the simulated Husky to navigate to a waypoint:
 
 </details>
 
-* There is another trade off here between how close you want your robot to achieve its target, vs. how many three-point turns it performs trying to navigate accurately. 
-
-### Task 2: Obstacle avoidance
-* Try instructing the Husky to drive close around an obstacle:
-  * You might notice it approaching too close (or crashing and/or flipping!); we'll look at this later also
+* There is another trade off here between how close you want your robot to achieve its target, vs. how many three-point turns it performs trying to navigate accurately!
 
 
-too close to obstacles
-
-http://wiki.ros.org/costmap_2d
-
-
-
-### Stretch Goals
+## Stretch Goals
 * velodyne TODO
 * increase lidar range
 * Later, try loading a different Gazebo world with, e.g.: 
