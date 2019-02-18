@@ -100,41 +100,43 @@ Now, launch `gazebo`, `gmapping` `rviz` and `move_base` in the four terminal win
 ### Basic Navigation: 
 
 In the `rviz` window, use the `2D Nav Goal` tool in the top toolbar to set a movement goal in the visualizer. Click and drag to set the desired heading.  As the robot navigates to the goal, you should see the occupancy gridmap grow. 
-
-Try navigating a few big loops around the simulated environment: 
+* Try navigating a few big loops around the simulated environment: 
   * The system will perform badly and you should see errors in the gridmap that continue to grow; we'll look into this in the next section.
-Try instructing the Husky to drive close around the concrete barrier in the center:
-  * You might notice it approaching too close (or crashing/flipping!); we'll look at this later also
+* Try instructing the Husky to drive close around an obstacle:
+  * You might notice it approaching too close (or crashing and/or flipping!); we'll look at this later also
 
 ### Hints:
-* If you're running in a virtual machine, slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel). Similarly, increase this to ~30 Hz on a fast PC. 
-* If Gazebo freezes, you may need to force kill it with `pkill gzserver`
-* During development, you can stop and restart `gmapping` and `move_base` separately with CTRL+C 
-* In the demo, the lidar's range is deliberately foreshortened
-* If `rviz` appears cluttered, feel free to turn off the Sensing group of visualisers in the Displays panel. 
-* Later, try loading a different Gazebo world with, e.g.: 
-     ```
-     roslaunch husky_gazebo husky_empty_world.launch \
-             world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
-     ```
-  * Note: the `jackal_race.world` file is found in `sudo apt install ros-kinetic-jackal-gazebo`
+* To help with performance in a virtual machine, you might want slow slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel). Conversely, increase this to ~30 Hz on a fast PC. 
+* If Gazebo freezes, you may need to force kill it with `pkill gzserver`.
+* During development, you can stop and restart `gmapping` and `move_base` independently with CTRL+C.
+* The lidar's range is deliberately foreshortened for this session (lidar-based SLAM is easy when you can see four walls)
+* If `rviz` appears cluttered, feel free to turn off the Sensing group of visualisers in the Displays panel
 
 ## Exploring SLAM using `gmapping` 
 
-`gmapping` uses a RBPF (or simply, a particle filter) to represent the current hypotheses of the robot's trajectory. For a fixed size set of particles, there is a maximum number of hypotheses that can be represented. Google 
+All real-world sensor data is noisy, thus, when a robot drives around fusing its noisy sensor data into a map and pose estimate (the SLAM problem), the map and pose will be noisy and accumulate drift. Unfortunately, the types of errors experienced by wheel odometry and lidar scan matching are frequently *non-Gaussian*, while process and measurement models are typically nonlinear, which means multivariate Gaussian probablility distributions (e.g. the often used Extended Kalman Filter, or EKF) are badly suited to representing a robots pose and map uncertainty.
 
-particle starvation
-particle starvation rbpf
+`gmapping` uses a Rao-Blackwellized Particle Filter to represent the current hypotheses of the robot's trajectory. Here, dozens of particles (or more) work together to describe complex probability distributions that are non-Gaussian and can handle nonlinear process and measurement models. However, for a fixed size set of particles, there is a maximum number of hypotheses that can be represented. Use Google to spend a few minutes learning about "[sample starvation](http://lmgtfy.com/?q=sample+starvation+particle+filter+slam)".
 
-check the CPU usage by `gmapping` before and after this change
+*Task 1:* Does the current `gmapping` configuration look like it is handling drift adequately? 
+* After driving around the simulated environment, errors appear to accumulate without bound.
+* Check if the `gmapping` configuration could be experiencing sample starvation.
+* Change one of the parameters and restart `gmapping` to see if the drift is corrected and map errors reduced.
 
-With particle filters, there's a direct (linear) trade between the number of particles and CPU usage. This will directly affect the size of the environment that `gmapping` can handle, and it will struggle to perform loop closures and maintain map accuracy when exploring for dozens of meters 'open loop' (not revising previously seen parts of the map). 
+<details><summary>Click to cheat</summary>
+  The particular line to consider in the husky_gmapping.launch file is [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/launch/husky_gmapping.launch#L40)
+</details>
 
-Occasionally, the `gmapping` algorithm will perform small loop closures 
+*Task 2:* Check the CPU used by `gmapping` before and after the change (hint: use `htop` and make sure Gazebo is a 1.0x realtime for both). 
+* With particle filters, there's a direct (linear) trade between the number of particles and CPU usage. This will directly affect the size of the environment that `gmapping` can handle. `gmapping` struggles to perform loop closures and maintain map accuracy when exploring dozens of meters 'open loop' (not revising previously seen parts of the map). 
 
-correct for relocalize the robot, causing a discrete jump in the map->odom transform.
-
-
+*Task 3:* Start with a clean gridmap and navigate the simulated Husky around the outside of the environment again. 
+* Try to observe what happens when a previously visited part of the map is revisited after a long excursion. 
+* If you notice a jump in the robot's pose, this is a classical "loop closure". The `gmapping` algorithm will ocassionally perform small loop closures.
+* Change the Fixed Frame in `Global Options` in the Displays panel to "odom" instead of "map"
+   * Perform another loop closure and observe what happens. 
+   * ROS specifies that the odom->base_link transform is continuous. Take a look at [REP 105](http://www.ros.org/reps/rep-0105.html) for more information.  
+   * Loop closures create a discrete jump in the map->odom transform.
  
 
 ### Exploring Navigation with `move_base` 
@@ -151,6 +153,14 @@ http://wiki.ros.org/costmap_2d
 
 ### Stretch Goals
 * velodyne TODO
+* increase lidar range
+* Later, try loading a different Gazebo world with, e.g.: 
+     ```
+     roslaunch husky_gazebo husky_empty_world.launch \
+             world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
+     ```
+  * Note: the `jackal_race.world` file is found in `sudo apt install ros-kinetic-jackal-gazebo`
+
 * **Try on a real robot:** 
   * **Motivation:** simulated robots often miss some of the subtleties of real robots   
   * **Goal:** configure a [TurtleBot3](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
