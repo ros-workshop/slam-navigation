@@ -1,6 +1,6 @@
 # SLAM & Navigation
 
-**Goal:** At the end of this session you should have a simulated robot navigating smoothly to user-selected waypoints, like this randomly selected Youtube video:
+**Goal:** At the end of this session you should have a simulated robot navigating smoothly to user-selected waypoints, like this Youtube video (click to play):
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=WmGVRX2r8WY" target="_blank"><img src="http://img.youtube.com/vi/WmGVRX2r8WY/0.jpg" alt="Video" width="480" height="360" border="10" /></a>
 
@@ -144,7 +144,7 @@ What is `gmapping's` CPU usage before and after the change?
 * Try to observe what happens when a previously visited part of the map is revisited after a long excursion. 
 * If you notice a jump in the robot's pose, this is a classical "loop closure". The `gmapping` algorithm will ocassionally perform small loop closures like this.
 * Change the Fixed Frame in `Global Options` in the Displays panel to "odom" instead of "map"
-   * Perform another loop closure and observe what happens. 
+   * Perform another loop closure and observe what happens. Why does the gridmap jump around instead?
    * ROS specifies that the odom->base_link transform is continuous. Take a look at [REP 105](http://www.ros.org/reps/rep-0105.html) for more information.  
    * Loop closures create a discrete jump in the map->odom transform.
    * Tune the particle count to balance CPU usage vs. ability to perform loop closures.
@@ -203,7 +203,7 @@ Tell the simulated Husky to navigate to a waypoint:
 * There is another trade off here between how close you want your robot to achieve its target, vs. how many three-point turns it performs trying to navigate accurately!
 
 
-## Extra Goals
+## Try this next
 * **Try increase the maximum lidar range in `gmapping`**
   * The default in `husky_gmapping.launch` is six meters
   * What happens when the lidar can hit all four walls at the same time? 
@@ -214,7 +214,9 @@ Tell the simulated Husky to navigate to a waypoint:
              world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
      ```
   * Note: the `jackal_race.world` file is found in `sudo apt install ros-kinetic-jackal-gazebo`
-* **Geofencing your robot:** 
+
+## Stretch Goals
+* **Try geofencing your robot:** 
   * **Motivation:** we want to annotate the map to keep the robot in a particular area 
   * **Goal:** save the map to disk, edit it, and then relocalising and navigate in it
   * **Instructions:**
@@ -223,18 +225,15 @@ Tell the simulated Husky to navigate to a waypoint:
     * Edit the gridmap (e.g. GIMP) to add some virtual "fences" 
     * Load the map and use the `amcl` package to relocalise the robot (hint: start [here](http://wiki.ros.org/husky_navigation/Tutorials/Husky%20AMCL%20Demo))
     * Show that `move_base` can navigate without crossing your virtual fences 
-
-
-## Stretch Goals
 * **Add a Velodyne VLP-16 lidar:** 
   * **Motivation:** A 16-plane lidar scanner provides a comprehensive 3D view of the world, however the extra data doesn't work out of the box with `gmapping` and `move_base`.  
   * **Goal:** integrate a VLP-16 into Gazebo and configure it to work with `gmapping` and `move_base`.
   * **Hints:**
     * Integrate into Gazebo (including the URDF)
     * The VLP-16's point cloud will need to be squashed into a laser scan topic for `gmapping`
-    * What is the best way to filter lidar returns from the ground? 
-    * The same technique can be used for `move_base`, however you could explore [this package.](https://github.com/SteveMacenski/spatio_temporal_voxel_layer).
-* **Large-scale SLAM:** 
+    * Lidar returns from the ground can appear like walls. What is the best way to filter them?
+    * The same technique can be used for `move_base`, however you could explore [this package.](https://github.com/SteveMacenski/spatio_temporal_voxel_layer)
+* **Large-scale SLAM with Cartographer:** 
   * **Motivation:** The RBPF algorithm used in ```gmapping``` does not scale well
   * **Goal:** test Cartographer, a modern pose-graph based SLAM implementation 
   * **Hints:**
