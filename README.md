@@ -1,16 +1,14 @@
-SLAM & Navigation
-==================
+# SLAM & Navigation
 Material for day 2 of the ROS Workshop.  
 
-Goal: At the end of this session you should have a simulated robot navigating to user-selected waypoints. Random Youtube video:
+**Overview:** This session will build on the ROS packages Clearpath makes available for their [Husky robot base](http://wiki.ros.org/Robots/Husky).  You will explore the `gmapping` SLAM package, along with the `move_base` navigation package.
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=WmGVRX2r8WY
-" target="_blank"><img src="http://img.youtube.com/vi/WmGVRX2r8WY/0.jpg" 
-alt="Video" width="240" height="180" border="10" /></a>
+**Goal:** At the end of this session you should have a simulated robot navigating to user-selected waypoints. 
 
+Random Youtube video:
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=WmGVRX2r8WY" target="_blank"><img src="http://img.youtube.com/vi/WmGVRX2r8WY/0.jpg" alt="Video" width="240" height="180" border="10" /></a>
 
-Introduction
--------------
+## Introduction
 
 ### Simultaneous Localisation and Mapping (SLAM)
 For a mobile robot to navigate through its environment, it requires both 1) a map of its environment, and 2) knowledge of where it is in that map. This is the "Simultaneous Localisation and Mapping" or SLAM problem, which is a fundamental problem in robotics and the focus of considerable research over the last few decades.
@@ -21,14 +19,7 @@ For a mobile robot to navigate through its environment, it requires both 1) a ma
 ### Navigation
 * TODO
 
-Instructions
-----------------
-
-### Overview
-
-This session will build on the ROS packages Clearpath makes available for their [Husky robot base](http://wiki.ros.org/Robots/Husky).  You will configure the `gmapping` SLAM package, along with the `move_base` navigation package. 
-
-### Setup
+## Workspace Setup
 
 * Make sure you are using the Catkin Workspace you created yesterday ([instructions here](https://github.com/ros-workshop/course)) and you have Git cloned this repository into the folder `workshop_ws/src`.
 
@@ -60,7 +51,7 @@ sudo apt install ros-kinetic-husky-simulator ros-kinetic-husky-viz ros-kinetic-h
 * The `ros-kinetic-husky-navigation` Debian package is dependent on the `gmapping` and `move_base` ROS packages that are used in this workshop-- they will be installed automatically. 
 
 
-## Launching Gazebo with `gmapping` and `move_base`
+## Launching the SLAM and Navigation Stack in Gazebo 
 
 To jump start to a working configuration, this repository includes a customised version of Clearpath's `husky_navigation` package. 
 
@@ -95,17 +86,10 @@ Launch `gazebo`, `rviz`, `gmapping` and `move_base` in four separate terminal wi
     ```
     * Note: 
         * In `rviz`, make sure the visualizers in the Navigation group are enabled.
-        * Use the 2D Nav Goal tool in the top toolbar to set a movement goal in the visualizer. 
-          * Make sure to select an unoccupied (TODO) or unexplored (TODO grey) location.
 
-## Basic 
+### Basic Navigation: 
 
-
-
-As the robot moves, you should see the grey static map (map topic) grow. Occasionally, the gmapping algorithm will relocalize the robot, causing a discrete jump in the map->odom transform.
-
-
-
+In the `rviz` window, use the `2D Nav Goal` tool in the top toolbar to set a movement goal in the visualizer. Click and drag to set the desired heading.  As the robot navigates to the goal, you should see the occupancy gridmap grow. 
 
 ### Hints:
 * If you're running in a virtual machine, slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel). Similarly, increase this to ~30 Hz on a fast PC. 
@@ -119,6 +103,9 @@ As the robot moves, you should see the grey static map (map topic) grow. Occasio
 
 ## Exploring SLAM using `gmapping` 
 
+Occasionally, the `gmapping` algorithm will perform small loop closures 
+
+correct for relocalize the robot, causing a discrete jump in the map->odom transform.
 
 
 
