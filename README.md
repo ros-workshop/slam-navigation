@@ -209,11 +209,16 @@ Tell the simulated Husky to navigate to a waypoint:
   * What happens when the lidar can hit all four walls at the same time? 
   * Does the CPU usage increase? Can the particle count be decreased?  
 * **Try a different Gazebo world:**  
+  * Feel free to find alternative `.world` files on the internet. 
+  * Launch Gazebo with:
+     ```
+     roslaunch husky_gazebo husky_empty_world.launch your_custom.world
+     ```
+  * E.g. you can install the `jackal_race.world` file with `sudo apt install ros-kinetic-jackal-gazebo` and launch Gazebo with:
      ```
      roslaunch husky_gazebo husky_empty_world.launch \
              world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
      ```
-  * Note: the `jackal_race.world` file is found in `sudo apt install ros-kinetic-jackal-gazebo`
 
 ## Stretch Goals
 * **Try geofencing your robot:** 
