@@ -41,18 +41,18 @@ git clone git@github.com:ros-workshop/slam-navigation.git
 </details>
 
 
-* You should have installed the Husky Debian packages `ros-kinetic-husky-simulator` and `ros-kinetic-husky-viz` yesterday using `apt`. For this session, install the `ros-kinetic-husky-navigation` package also.
+* You should have installed the Husky Debian packages `ros-melodic-husky-simulator` and `ros-melodic-husky-viz` yesterday using `apt`. For this session, install the `ros-melodic-husky-navigation` package also.
 
 <details><summary>Click for a hint</summary>
 
 ```
-sudo apt install ros-kinetic-husky-simulator ros-kinetic-husky-viz ros-kinetic-husky-navigation
+sudo apt install ros-melodic-husky-simulator ros-melodic-husky-viz ros-melodic-husky-navigation 
 ```
 
 </details>
 
 
-* The `ros-kinetic-husky-navigation` Debian package is dependent on the `gmapping` and `move_base` ROS packages that are used in this workshop, they will be installed automatically. 
+* The `ros-melodic-husky-navigation` Debian package is dependent on the `gmapping` and `move_base` ROS packages that are used in this workshop, they will be installed automatically. 
 
 
 ## Launching the SLAM and Navigation Stacks 
@@ -214,10 +214,10 @@ Tell the simulated Husky to navigate to a waypoint:
      ```
      roslaunch husky_gazebo husky_empty_world.launch your_custom.world
      ```
-  * E.g. you can install the `jackal_race.world` file with `sudo apt install ros-kinetic-jackal-gazebo` and launch Gazebo with:
+  * E.g. you can install the `jackal_race.world` file with `sudo apt install ros-melodic-jackal-gazebo` and launch Gazebo with:
      ```
      roslaunch husky_gazebo husky_empty_world.launch \
-             world_name:=/opt/ros/kinetic/share/jackal_gazebo/worlds/jackal_race.world
+             world_name:=/opt/ros/melodic/share/jackal_gazebo/worlds/jackal_race.world
      ```
 
 ## Stretch Goals
