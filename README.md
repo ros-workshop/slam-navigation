@@ -5,8 +5,8 @@
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=WmGVRX2r8WY" target="_blank"><img src="http://img.youtube.com/vi/WmGVRX2r8WY/0.jpg" alt="Video" width="480" height="360" border="10" /></a>
 
 **Overview:** 
-This session uses the ROS packages Clearpath makes available for their [Husky robot base][ros-husky]. 
-You will experiment with the [`gmapping`][ros-gmapping] SLAM package, along with the `move_base` navigation package.
+This session uses the ROS packages Clearpath makes available for their [Husky robot base](http://wiki.ros.org/Robots/Husky). 
+You will experiment with the [`gmapping`](http://wiki.ros.org/gmapping) SLAM package, along with the `move_base` navigation package.
 
 ## Background
 
@@ -16,10 +16,10 @@ For a mobile robot to navigate an environment, it requires both
 2) Knowledge of where it is in that map. 
  
 This is the _"Simultaneous Localisation and Mapping"_ or SLAM problem, which is a fundamental problem in robotics and the focus of considerable research over the last few decades.
-* Spend a few minutes reading about the SLAM problem on Wikipedia [here][wp-slam].  
-* The SLAM algorithm used in this workshop is a Rao-Blackwellized Particle Filter ([this tutorial][tut-rbpf] has some more information on RBPFs).  
-* The ROS implementation used here is called [GMapping][ros-gmapping], it was open sourced by Grisetti et al. [here][gmapping-openslam], while [this paper][gmapping-algorithm] describes the algorithm in detail.
-* [This comprehensive slide deck][ref-slides] by Wolfram Burgard is a good general overview of SLAM algorithms.  
+* Spend a few minutes reading about the SLAM problem on Wikipedia [here](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping).  
+* The SLAM algorithm used in this workshop is a Rao-Blackwellized Particle Filter ([this tutorial](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/rbpf-slam-tutorial-2007.pdf) has some more information on RBPFs).  
+* The ROS implementation used here is called [GMapping](http://wiki.ros.org/gmapping), it was open sourced by Grisetti et al. [here](https://openslam-org.github.io/gmapping.html), while [this paper](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti07tro.pdf) describes the algorithm in detail.
+* [This comprehensive slide deck](https://www.rsj.or.jp/databox/international/iros16tutorial_1.pdf) by Wolfram Burgard is a good general overview of SLAM algorithms.  
 
 ### Navigation
 * https://en.wikipedia.org/wiki/Robot_navigation
@@ -27,7 +27,7 @@ This is the _"Simultaneous Localisation and Mapping"_ or SLAM problem, which is 
 
 ## Workspace Setup
 
-Make sure you are using the Catkin Workspace you created yesterday ([instructions here][gh-00-course]) and you have cloned this repository into the folder `workshop_ws/src`.
+Make sure you are using the Catkin Workspace you created yesterday ([instructions here](https://github.com/ros-workshop/course)) and you have cloned this repository into the folder `workshop_ws/src`.
 
 <details>
 <summary>Click for a hint</summary>
@@ -149,7 +149,7 @@ What is `gmapping's` CPU usage before and after the change?
 * If you notice a jump in the robot's pose, this is a classical "loop closure". The `gmapping` algorithm will ocassionally perform small loop closures like this.
 * Change the Fixed Frame in `Global Options` in the Displays panel to "odom" instead of "map"
    * Perform another loop closure and observe what happens. Why does the gridmap jump around instead?
-   * ROS specifies that the odom->base_link transform is continuous. Take a look at [REP 105][ros-rep-0105] for more information.  
+   * ROS specifies that the odom->base_link transform is continuous. Take a look at [REP 105](http://www.ros.org/reps/rep-0105.html) for more information.  
    * Loop closures create a discrete jump in the map->odom transform.
    * Tune the particle count to balance CPU usage vs. ability to perform loop closures.
  
@@ -163,7 +163,7 @@ While there are dozens of navigation algorithms described in the literature (`mo
 
 Tell the simulated Husky to navigate near to and/or around an obstacle:  
   * You might notice that it approaches closer than you'd like, and occasionally hits obstacles below its lidar's height
-  * Read about obstacle "inflation" [here][ros-costmap-2d]. 
+  * Read about obstacle "inflation" [here](http://wiki.ros.org/costmap_2d). 
     * Take note of the plot showing how cell cost decreases with the distance from an obstacle.
     * Note the difference between the "lethal" distance where the robot would be in collision, and the "inscribed" and "possibly circumscribed" distances that depend on the robot's footprint. 
     * Look for a parameter that might create a "buffer zone" around obstacles to naturally keep the robot further away. 
@@ -232,7 +232,7 @@ Tell the simulated Husky to navigate to a waypoint:
   * Build a complete map of the environment using `gmapping`
   * Save the gridmap to disk (hint: google `ros map_server map_saver`) and shut down `gmapping`
   * Edit the gridmap (e.g. GIMP) to add some virtual "fences" 
-  * Load the map and use the `amcl` package to relocalise the robot (hint: start [here][ros-husky-tut-amcl])
+  * Load the map and use the `amcl` package to relocalise the robot (hint: start [here](http://wiki.ros.org/husky_navigation/Tutorials/Husky%20AMCL%20Demo))
   * Show that `move_base` can navigate without crossing your virtual fences 
 ### Add a Velodyne VLP-16 lidar
 * **Motivation:** A 16-plane lidar scanner provides a comprehensive 3D view of the world, however the extra data doesn't work out of the box with `gmapping` and `move_base`.  
@@ -241,21 +241,21 @@ Tell the simulated Husky to navigate to a waypoint:
   * Integrate into Gazebo (including the URDF)
   * The VLP-16's point cloud will need to be squashed into a laser scan topic for `gmapping`
   * Lidar returns from the ground can appear like walls. What is the best way to filter them?
-  * The same technique can be used for `move_base`, however you could explore [this package.][gh-stvl]
+  * The same technique can be used for `move_base`, however you could explore [this package.](https://github.com/SteveMacenski/spatio_temporal_voxel_layer)
 ### Large-scale SLAM with Cartographer 
 * **Motivation:** The RBPF algorithm used in ```gmapping``` does not scale well
 * **Goal:** test Cartographer, a modern pose-graph based SLAM implementation 
 * **Hints:**
-  * Clone and build Google's Cartographer by following the instructions [here][docs-cartographer]
+  * Clone and build Google's Cartographer by following the instructions [here](https://google-cartographer-ros.readthedocs.io/en/latest/)
   * **Warning:** Make sure you don't install Protobuf 3.x system wide (don't type sudo!) or you'll break other ROS packages. 
-  * If you get stuck, Clearpath have done [some of the work for you.][gh-husky-cartographer-install]
+  * If you get stuck, Clearpath have done [some of the work for you.](https://github.com/husky/husky_cartographer_navigation/blob/master/husky_cartographer_install.sh)
   * Note: make sure you understand what `catkin_make_isolated` does if you're actively developing in a workspace (you've been warned!)
 ### Try on a real robot 
 * **Motivation:** simulated robots often miss some of the subtleties of real robots   
-* **Goal:** configure a [TurtleBot3][docs-turtlebot3-overview] to navigate around the lab
+* **Goal:** configure a [TurtleBot3](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
 * **Instructions:**
   * There are limited TurtleBot3s available, please demonstrate navigation in Gazebo first
-  * Follow the [instructions here][docs-turtlebot3-navigation]
+  * Follow the [instructions here](http://emanual.robotis.com/docs/en/platform/turtlebot3/navigation)
 
 ### Questions
 * What does the tf tree and node graphs look like while navigating?
@@ -264,8 +264,8 @@ Tell the simulated Husky to navigate to a waypoint:
 * What is the difference between a ROS package and a Debian (Ubuntu) package?
 
 ### Links
-* [Clearpath Husky wiki][ros-husky]
-* [Husky repos on Github][gh-husky]
+* [Clearpath Husky wiki](http://wiki.ros.org/Robots/Husky)
+* [Husky repos on Github](https://github.com/husky/husky)
 
 [docs-cartographer]: "https://google-cartographer-ros.readthedocs.io/en/latest/"
 [docs-turtlebot3-overview]: "http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/" 
