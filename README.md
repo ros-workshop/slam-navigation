@@ -231,10 +231,10 @@ Tell the simulated Husky to navigate to a waypoint:
      ```
      roslaunch husky_gazebo husky_empty_world.launch your_custom.world
      ```
-  * E.g. you can install the `jackal_race.world` file with `sudo apt install ros-melodic-jackal-gazebo` and launch Gazebo with:
+  * E.g. you can install the `jackal_race.world` file with `sudo apt install ros-noetic-jackal-gazebo` and launch Gazebo with:
      ```
      roslaunch husky_gazebo husky_empty_world.launch \
-             world_name:=/opt/ros/melodic/share/jackal_gazebo/worlds/jackal_race.world
+             world_name:=/opt/ros/noetic/share/jackal_gazebo/worlds/jackal_race.world
      ```
 
 ## Stretch Goals
