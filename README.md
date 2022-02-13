@@ -50,7 +50,7 @@ The following Husky Debian packages should have been installed in the previous w
 sudo apt install ros-$ROS_DISTRO-husky-simulator
 sudo apt install ros-$ROS_DISTRO-husky-viz
 ``` 
-For this session, install the `ros-melodic-husky-navigation` package also.
+For this session, install the `ros-noetic-husky-navigation` package also.
 
 ```bash
 sudo apt install ros-$ROS_DISTRO-husky-navigation 
@@ -78,7 +78,8 @@ Now, launch `gazebo`, `gmapping` `rviz` and `move_base` in the four terminal win
     roslaunch husky_gazebo husky_playpen.launch
     ```
     * Note: 
-      * This will take several minutes to start on first run, as the simulator needs to download resources from the internet
+      * You should have already downloaded a large Gazebo model library in yesterday's workshop.
+      If you haven't, visit this [Github repo](https://github.com/osrf/gazebo_models) and research what you need to do with them.
       * This command will start the roscore server
       * Consider arranging this window so Gazebo fills the left half of the screen
       * Check the console for error messages before proceeding
@@ -106,14 +107,17 @@ Now, launch `gazebo`, `gmapping` `rviz` and `move_base` in the four terminal win
 
 ### Basic Navigation: 
 
-In the `rviz` window, use the `2D Nav Goal` tool in the top toolbar to set a movement goal in the visualizer. Click and drag to set the desired heading.  As the robot navigates to the goal, you should see the occupancy gridmap grow. 
+In the `rviz` window, use the `2D Nav Goal` tool in the top toolbar to set a movement goal in the visualizer. 
+Click and drag to set the desired heading.
+As the robot navigates to the goal, you should see the occupancy gridmap grow. 
 * Try navigating a few big loops around the simulated environment: 
   * The system will perform badly and you should see errors in the gridmap that continue to grow; we'll look into this in the next section.
 * Try instructing the Husky to drive close around an obstacle:
   * You might notice it approaching too close (or crashing and/or flipping!); we'll look at this later also
 
 ### Hints:
-* To help with performance in a virtual machine, you might want slow slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel). Conversely, increase this to ~30 Hz on a fast PC. 
+* To help with performance in a virtual machine, you might want slow slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel).
+Conversely, increase this to ~30 Hz on a fast PC. 
 * If Gazebo freezes, you may need to force kill it with `pkill gzserver`.
 * During development, you can stop and restart `gmapping` and `move_base` independently with CTRL+C.
 * The lidar's range is deliberately foreshortened for this session (lidar-based SLAM is easy when you can see four walls)
@@ -121,9 +125,13 @@ In the `rviz` window, use the `2D Nav Goal` tool in the top toolbar to set a mov
 
 ## Exploring SLAM using `gmapping` 
 
-All real-world sensor data is noisy, thus, when a robot drives around fusing its noisy sensor data into a map and pose estimate (the SLAM problem), the map and pose will be noisy and accumulate drift. Unfortunately, the types of errors experienced by wheel odometry and lidar scan matching are frequently *non-Gaussian*, while process and measurement models are typically nonlinear, which means multivariate Gaussian probablility distributions (e.g. the frequently used Extended Kalman Filter, or EKF) are badly suited to representing a robots pose and map uncertainty.
+All real-world sensor data is noisy, thus, when a robot drives around fusing its noisy sensor data into a map and pose estimate (the SLAM problem), the map and pose will be noisy and accumulate drift.
+Unfortunately, the types of errors experienced by wheel odometry and lidar scan matching are frequently *non-Gaussian*, while process and measurement models are typically nonlinear, which means multivariate Gaussian probablility distributions (e.g. the frequently used Extended Kalman Filter, or EKF) are badly suited to representing a robots pose and map uncertainty.
 
-`gmapping` uses a Rao-Blackwellized Particle Filter to represent the current hypotheses of the robot's trajectory. Here, dozens of particles (or more) work together to describe complex probability distributions that are non-Gaussian and can handle nonlinear process and measurement models. However, for a fixed size set of particles, there is a maximum number of hypotheses that can be represented. Use Google to spend a few minutes learning about "[sample starvation](http://lmgtfy.com/?q=sample+starvation+particle+filter+slam)".
+`gmapping` uses a Rao-Blackwellized Particle Filter to represent the current hypotheses of the robot's trajectory.
+Here, dozens of particles (or more) work together to describe complex probability distributions that are non-Gaussian and can handle nonlinear process and measurement models.
+However, for a fixed size set of particles, there is a maximum number of hypotheses that can be represented.
+Use Google to spend a few minutes learning about "[sample starvation](http://lmgtfy.com/?q=sample+starvation+particle+filter+slam)".
 
 ### Task 1: Drift, or accumulated sensor errors 
 Does the current `gmapping` configuration look like it is handling drift? 
@@ -141,12 +149,15 @@ Does the current `gmapping` configuration look like it is handling drift?
 ### Task 2: Computational requirements
 What is `gmapping's` CPU usage before and after the change? 
 * Hint: use `htop` and make sure Gazebo is running at 1.0x realtime in both instances. 
-* With particle filters, there's a direct (linear) trade between the number of particles and CPU usage. This will directly affect the size of the environment that `gmapping` can handle. `gmapping` struggles to perform loop closures and maintain map accuracy when exploring dozens of meters 'open loop' (not revising previously seen parts of the map). 
+* With particle filters, there's a direct (linear) trade between the number of particles and CPU usage.
+This will directly affect the size of the environment that `gmapping` can handle.
+`gmapping` struggles to perform loop closures and maintain map accuracy when exploring dozens of meters 'open loop' (not revising previously seen parts of the map). 
 
 ### Task 3: Loop closures and transforms
 * With a clean gridmap, navigate the simulated Husky around the outside of the environment again.
 * Try to observe what happens when a previously visited part of the map is revisited after a long excursion. 
-* If you notice a jump in the robot's pose, this is a classical "loop closure". The `gmapping` algorithm will ocassionally perform small loop closures like this.
+* If you notice a jump in the robot's pose, this is a classical "loop closure".
+The `gmapping` algorithm will ocassionally perform small loop closures like this.
 * Change the Fixed Frame in `Global Options` in the Displays panel to "odom" instead of "map"
    * Perform another loop closure and observe what happens. Why does the gridmap jump around instead?
    * ROS specifies that the odom->base_link transform is continuous. Take a look at [REP 105](http://www.ros.org/reps/rep-0105.html) for more information.  
@@ -155,9 +166,11 @@ What is `gmapping's` CPU usage before and after the change?
  
 ## Exploring Navigation with `move_base` 
 
-While there are dozens of navigation algorithms described in the literature (`move_base` only implements a few), there exists a handful of commonly occuring parameters. We'll explore two of them here. 
+While there are dozens of navigation algorithms described in the literature (`move_base` only implements a few), there exists a handful of commonly occuring parameters.
+We'll explore two of them here. 
 
-**Note:** if at any time the gridmap gets badly distorted, restart  `gmapping` by hitting CTRL+C in its terminal window. `move_base` will not be able to create global plans if the gridmap is distorted. 
+**Note:** if at any time the gridmap gets badly distorted, restart  `gmapping` by hitting CTRL+C in its terminal window.
+`move_base` will not be able to create global plans if the gridmap is distorted. 
 
 ### Task 1: Obstacle avoidance
 
@@ -266,27 +279,3 @@ Tell the simulated Husky to navigate to a waypoint:
 ### Links
 * [Clearpath Husky wiki](http://wiki.ros.org/Robots/Husky)
 * [Husky repos on Github](https://github.com/husky/husky)
-
-[docs-cartographer]: "https://google-cartographer-ros.readthedocs.io/en/latest/"
-[docs-turtlebot3-overview]: "http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/" 
-[docs-turtlebot3-navigation]: "http://emanual.robotis.com/docs/en/platform/turtlebot3/navigation"
-
-[gh-00-course]: "https://github.com/ros-workshop/course"
-[gh-husky]: "https://github.com/husky/husky"
-[gh-husky-cartographer-install]: "https://github.com/husky/husky_cartographer_navigation/blob/master/husky_cartographer_install.sh"
-[gh-stvl]: "https://github.com/SteveMacenski/spatio_temporal_voxel_layer"
-
-[gmapping-openslam]: "https://openslam-org.github.io/gmapping.html"
-[gmapping-algorithm]: "http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti07tro.pdf"
-
-[ros-costmap-2d]: "http://wiki.ros.org/costmap_2d"
-[ros-gmapping]: "http://wiki.ros.org/gmapping"
-[ros-husky]: "http://wiki.ros.org/Robots/Husky"
-[ros-husky-tut-amcl]: "http://wiki.ros.org/husky_navigation/Tutorials/Husky%20AMCL%20Demo"
-[ros-rep-0105]: "http://www.ros.org/reps/rep-0105.html"
-
-[ref-slides]: "https://www.rsj.or.jp/databox/international/iros16tutorial_1.pdf"
-[tut-rbpf]: "http://www2.informatik.uni-freiburg.de/~stachnis/pdf/rbpf-slam-tutorial-2007.pdf"
-[wp-slam]: "https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping"
-
-`
