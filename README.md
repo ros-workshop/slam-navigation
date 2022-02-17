@@ -260,9 +260,10 @@ Tell the simulated Husky to navigate to a waypoint:
 * **Goal:** test Cartographer, a modern pose-graph based SLAM implementation 
 * **Hints:**
   * Clone and build Google's Cartographer by following the instructions [here](https://google-cartographer-ros.readthedocs.io/en/latest/)
-  * **Warning:** Make sure you don't install Protobuf 3.x system wide (don't type sudo!) or you'll break other ROS packages. 
-  * If you get stuck, Clearpath have done [some of the work for you.](https://github.com/husky/husky_cartographer_navigation/blob/master/husky_cartographer_install.sh)
   * Note: make sure you understand what `catkin_make_isolated` does if you're actively developing in a workspace (you've been warned!)
+  * You can use `catkin build` instead of `catkin_make_isolated`, and you can put it into your active workspace you are developing in, but it is better to learn how to do workspace chaining and some other tools to get the job done while you are here!
+  * If you get stuck, Clearpath have done [some of the work for you.](https://github.com/husky/husky_cartographer_navigation/blob/master/husky_cartographer_install.sh)
+  * There are a couple ways to do workspace chaining, so google away and seek help if you haven't gotten anywhere in 15 minutes.
 ### Try on a real robot 
 * **Motivation:** simulated robots often miss some of the subtleties of real robots   
 * **Goal:** configure a [TurtleBot3](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
