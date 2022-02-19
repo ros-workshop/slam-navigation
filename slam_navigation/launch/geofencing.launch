@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="map_server" type="map_server" name="map_server" args="$(find slam_navigation)/maps/geofenced.yaml" />
+
+    <include file="$(find slam_navigation)/launch/amcl.launch" />
+</launch>
