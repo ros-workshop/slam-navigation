@@ -258,7 +258,8 @@ Tell the simulated Husky to navigate to a waypoint:
 ### Large-scale SLAM with Cartographer 
 * **Motivation:** The RBPF algorithm used in ```gmapping``` does not scale well
 * **Goal:** test Cartographer, a modern pose-graph based SLAM implementation 
-* **Hints:**
+* **Instructions and Hints:**
+  * We only expect offline processing for this goal, as the online processing can require a lot of compute!
   * Clone and build Google's Cartographer by following the instructions [here](https://google-cartographer-ros.readthedocs.io/en/latest/)
   * Note: make sure you understand what `catkin_make_isolated` does if you're actively developing in a workspace (you've been warned!)
   * You can use `catkin build` instead of `catkin_make_isolated`, and you can put it into your active workspace you are developing in, but it is better to learn how to do workspace chaining and some other tools to get the job done while you are here!
