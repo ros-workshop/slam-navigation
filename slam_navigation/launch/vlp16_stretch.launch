@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <env name="HUSKY_LMS1XX_ENABLED" value="0" />
+    <env name="HUSKY_LASER_3D_ENABLED" value="1" />
+
+    <include file="$(find husky_gazebo)/launch/husky_playpen.launch" />
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pctls">
+        <remap from="cloud_in" to="/points" />
+    </node>
+</launch>
