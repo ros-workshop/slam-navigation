@@ -1,12 +1,13 @@
 # SLAM & Navigation
 
-**Goal:** At the end of this session you should have a simulated robot navigating smoothly to user-selected waypoints, like this Youtube video (click to play):
+## Overview
+
+In this session we'll learn how to make a simulated [Clearpath Husky robot](http://wiki.ros.org/Robots/Husky) navigate smoothly between user-selected waypoints. 
+We'll experiment with the [`gmapping`](http://wiki.ros.org/gmapping) SLAM package, along with the [`move_base`](http://wiki.ros.org/move_base) navigation package. 
+At the end of this session you should have a simulated robot navigating around like this Youtube video (click to play):
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=WmGVRX2r8WY" target="_blank"><img src="http://img.youtube.com/vi/WmGVRX2r8WY/0.jpg" alt="Video" width="480" height="360" border="10" /></a>
 
-**Overview:** 
-This session uses the ROS packages Clearpath makes available for their [Husky robot base](http://wiki.ros.org/Robots/Husky). 
-You will experiment with the [`gmapping`](http://wiki.ros.org/gmapping) SLAM package, along with the `move_base` navigation package.
 
 ## Background
 
@@ -15,15 +16,17 @@ For a mobile robot to navigate an environment, it requires both
 1) A map of its environment, and 
 2) Knowledge of where it is in that map. 
  
-This is the _"Simultaneous Localisation and Mapping"_ or SLAM problem, which is a fundamental problem in robotics and the focus of considerable research over the last few decades.
-* Spend a few minutes reading about the SLAM problem on Wikipedia [here](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping).  
-* The SLAM algorithm used in this workshop is a Rao-Blackwellized Particle Filter ([this tutorial](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/rbpf-slam-tutorial-2007.pdf) has some more information on RBPFs).  
-* The ROS implementation used here is called [GMapping](http://wiki.ros.org/gmapping), it was open sourced by Grisetti et al. [here](https://openslam-org.github.io/gmapping.html), while [this paper](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti07tro.pdf) describes the algorithm in detail.
-* [This comprehensive slide deck](https://www.rsj.or.jp/databox/international/iros16tutorial_1.pdf) by Wolfram Burgard is a good general overview of SLAM algorithms.  
+This is the _"Simultaneous Localisation and Mapping"_ or SLAM problem, which is a fundamental problem in robotics and the focus of considerable research over the last few decades. Spend a few minutes reading about:
+* The [SLAM problem](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping) on Wikipedia.  
+* The [Rao-Blackwellized Particle Filter][rbpf-tutorial] (RBPF), which is the SLAM algorithm used in this workshop ([this tutorial][rbpf-tutorial] is a good starting point if you'd like to learn more).
+* The [GMapping](http://wiki.ros.org/gmapping) ROS package, which is the RBPF implementation used in this workshop. [This paper](http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti07tro.pdf) by Grisetti et al. describes the approach in detail.
+* Other solutions to the SLAM problem, e.g. [this slide deck][slam-tutorial] by Wolfram Burgard is a good general overview.
 
 ### Navigation
-* https://en.wikipedia.org/wiki/Robot_navigation
-* http://wiki.ros.org/navigation/Tutorials
+
+Once a robot has a map of it's environment and is well localised, it can begin planning paths to waypoint goals and navigating along them. Spend a few minutes reading about:
+* [Robot navigation](https://en.wikipedia.org/wiki/Robot_navigation) and
+* The [ROS Nav Stack](http://wiki.ros.org/navigation) including these [tutorials](http://wiki.ros.org/navigation/Tutorials).
 
 ## Workspace Setup
 
@@ -45,25 +48,25 @@ git clone git@github.com:ros-workshop/slam-navigation.git
 
 </details>
 
-The following Husky Debian packages should have been installed in the previous workshop.
+The following Husky Debian packages should have been installed in yesterday's workshop session:
 ```bash
 sudo apt install ros-$ROS_DISTRO-husky-simulator
 sudo apt install ros-$ROS_DISTRO-husky-viz
 ``` 
-For this session, install the `ros-noetic-husky-navigation` package also.
+For this session, install the `husky_navigation` package also:
 
 ```bash
 sudo apt install ros-$ROS_DISTRO-husky-navigation 
 ```
 
-**Note**: The `husky-navigation` package is dependent on the `gmapping` and `move_base` ROS packages that are used in this workshop and will be installed automatically. 
+**Note**: The `husky_navigation` package is dependent on the `gmapping` and `move_base` ROS packages that are used in this workshop and will be installed automatically. 
 
 
 ## Launching the SLAM and Navigation Stacks 
 
-To jump start a working configuration, this repository includes a customised version of Clearpath's `husky_navigation` package. 
+To jump start with a working configuration, this repository includes a customised version of Clearpath's `husky_navigation` package. 
 
-First start four separate terminal windows (hint: consider using a split screen terminal such as `apt install terminator`), and source your Catkin workspace
+First start four separate terminal windows (hint: consider using a split screen terminal such as `terminator`), and source your Catkin workspace
 
 <details><summary>Click for a hint</summary>
 
@@ -72,17 +75,16 @@ cd ~/workshop_ws && source devel/setup.bash
 ```
 </details>
 
-Now, launch `gazebo`, `gmapping` `rviz` and `move_base` in the four terminal windows:
-1. Launch the Husky simulation environment:
+Now, launch `gazebo`, `gmapping`, `rviz` and `move_base` in the four terminal windows:
+1. Launch the `gazebo` Husky simulation environment:
     ```
     roslaunch husky_gazebo husky_playpen.launch
     ```
-    * Note: 
-      * You should have already downloaded a large Gazebo model library in yesterday's workshop.
-      If you haven't, visit this [Github repo](https://github.com/osrf/gazebo_models) and research what you need to do with them.
-      * This command will start the roscore server
-      * Consider arranging this window so Gazebo fills the left half of the screen
-      * Check the console for error messages before proceeding
+    * This command will start the roscore server and load the Gazebo world and robot model.
+    * The Gazebo 3D assets should be already cached from yesterday's workshop session. If Gazebo appears to hang, the assets may be downloading in the background. Visit [this repo](https://github.com/osrf/gazebo_models) and download the assets (Hint: Use "Download ZIP"). To install, unzip the files into `~/.gazebo/models/`.
+    * Consider arranging the Gazebo window so it fills the left half of the screen.
+    * Check the console for error messages before proceeding.
+
 1. Launch `gmapping`:
     ```
     roslaunch slam_navigation husky_gmapping.launch
@@ -116,7 +118,7 @@ As the robot navigates to the goal, you should see the occupancy gridmap grow.
   * You might notice it approaching too close (or crashing and/or flipping!); we'll look at this later also
 
 ### Hints:
-* To help with performance in a virtual machine, you might want slow slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel).
+* To help with performance in a virtual machine, you might want to slow the Rviz framerate down to 10 Hz (Expand `Global Options` in the Displays panel).
 Conversely, increase this to ~30 Hz on a fast PC. 
 * If Gazebo freezes, you may need to force kill it with `pkill gzserver`.
 * During development, you can stop and restart `gmapping` and `move_base` independently with CTRL+C.
@@ -239,8 +241,8 @@ Tell the simulated Husky to navigate to a waypoint:
 
 ## Stretch Goals
 ### Try geofencing your robot 
-* **Motivation:** we want to annotate the map to keep the robot in a particular area 
-* **Goal:** save the map to disk, edit it, and then relocalising and navigate in it
+* **Motivation:** We want to annotate the map to keep the robot in a particular area 
+* **Goal:** Save the map to disk, edit it, and then relocalising and navigate in it
 * **Instructions:**
   * Build a complete map of the environment using `gmapping`
   * Save the gridmap to disk (hint: google `ros map_server map_saver`) and shut down `gmapping`
@@ -249,35 +251,39 @@ Tell the simulated Husky to navigate to a waypoint:
   * Show that `move_base` can navigate without crossing your virtual fences 
 ### Add a Velodyne VLP-16 lidar
 * **Motivation:** A 16-plane lidar scanner provides a comprehensive 3D view of the world, however the extra data doesn't work out of the box with `gmapping` and `move_base`.  
-* **Goal:** integrate a VLP-16 into Gazebo and configure it to work with `gmapping` and `move_base`.
+* **Goal:** Integrate a VLP-16 into Gazebo and configure it to work with `gmapping` and `move_base`.
 * **Hints:**
   * Integrate into Gazebo (including the URDF)
   * The VLP-16's point cloud will need to be squashed into a laser scan topic for `gmapping`
   * Lidar returns from the ground can appear like walls. What is the best way to filter them?
   * The same technique can be used for `move_base`, however you could explore [this package.](https://github.com/SteveMacenski/spatio_temporal_voxel_layer)
 ### Large-scale SLAM with Cartographer 
-* **Motivation:** The RBPF algorithm used in ```gmapping``` does not scale well
-* **Goal:** test Cartographer, a modern pose-graph based SLAM implementation 
+* **Motivation:** The RBPF algorithm used in `gmapping` does not scale well
+* **Goal:** Explore [Cartographer][cartographer], a modern pose-graph based SLAM implementation 
 * **Instructions and Hints:**
-  * We only expect offline processing for this goal, as the online processing can require a lot of compute!
-  * Clone and build Google's Cartographer by following the instructions [here](https://google-cartographer-ros.readthedocs.io/en/latest/)
-  * Note: make sure you understand what `catkin_make_isolated` does if you're actively developing in a workspace (you've been warned!)
-  * You can use `catkin build` instead of `catkin_make_isolated`, and you can put it into your active workspace you are developing in, but it is better to learn how to do workspace chaining and some other tools to get the job done while you are here!
-  * If you get stuck, Clearpath have done [some of the work for you.](https://github.com/husky/husky_cartographer_navigation/blob/master/husky_cartographer_install.sh)
-  * There are a couple ways to do workspace chaining, so google away and seek help if you haven't gotten anywhere in 15 minutes.
-### Try on a real robot 
+  * Melodic users should be able to `apt install ros-melodic-cartographer-ros`
+  * Noetic users will need to clone and build Cartographer by following the instructions [here][cartographer], note: 
+    * Make sure you understand what `catkin_make_isolated` does if you're actively developing in a workspace (you've been warned!)
+    * You can use `catkin build` instead of `catkin_make_isolated`, and you can put it into your active workspace, however it is better to learn how to *extend* a Catkin workspace!
+    * If you get stuck, Clearpath have done [some of the work for you.](https://github.com/husky/husky_cartographer_navigation/blob/master/husky_cartographer_install.sh)
+  * Pose-graph SLAM can require a lot of computation, so computation may lag behind realtime.
+### Try navigating a real robot 
 * **Motivation:** simulated robots often miss some of the subtleties of real robots   
-* **Goal:** configure a [TurtleBot3](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
+* **Goal:** configure a [TurtleBot](http://emanual.robotis.com/docs/en/platform/turtlebot3/overview/) to navigate around the lab
 * **Instructions:**
-  * There are limited TurtleBot3s available, please demonstrate navigation in Gazebo first
+  * There are limited TurtleBots available; please demonstrate navigation in the Gazebo simulation before borrowing a TurtleBot. 
   * Follow the [instructions here](http://emanual.robotis.com/docs/en/platform/turtlebot3/navigation)
 
 ### Questions
-* What does the tf tree and node graphs look like while navigating?
+* What does the `tf` tree and node graphs look like while navigating?
 * How do you remap a topic name when starting a node in a lanch file?
 * What is an workspace overlay in Catkin? 
 * What is the difference between a ROS package and a Debian (Ubuntu) package?
 
 ### Links
 * [Clearpath Husky wiki](http://wiki.ros.org/Robots/Husky)
-* [Husky repos on Github](https://github.com/husky/husky)
+* [Husky repositories on Github](https://github.com/husky/husky)
+
+[rbpf-tutorial]: http://www2.informatik.uni-freiburg.de/~stachnis/pdf/rbpf-slam-tutorial-2007.pdf
+[slam-tutorial]: https://www.rsj.or.jp/databox/international/iros16tutorial_1.pdf
+[cartographer]: https://google-cartographer-ros.readthedocs.io/en/latest
