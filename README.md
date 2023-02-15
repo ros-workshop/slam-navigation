@@ -208,12 +208,12 @@ Tell the simulated Husky to navigate to a waypoint:
     <summary>Click for a hint</summary>
     
    * In the `move_base.launch` file, look for the line `<arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>`
-    * This maps to the local planner being used and hints at the config file section
+   * This maps to the local planner being used and hints at the config file section
 
 <details>
     <summary>Click to cheat</summary>
 
-    * The particular lines to consider are in `config/planner.yaml` file [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/config/planner.yaml#L72)
+   * The particular lines to consider are in `config/planner.yaml` file [here](https://github.com/ros-workshop/slam-navigation/blob/master/slam_navigation/config/planner.yaml#L72)
 
 </details>
 
